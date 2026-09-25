@@ -170,10 +170,17 @@ def get_FA19_calls(WG_defaults,file,AA):
                     result = variant[10].split(' ')[-1].split(WG_defaults[field]["AA Position"]) #parse resulting AA from "EFFECT" column
                     if len(result) == 2 and len(result[1]) == 3:
                         aa = result[1]
-                        results[field] = AA[aa]
+                        if aa == 'dup': #check if it's a duplication (e.g. p.Gly70dup)
+                            results[field] = WG_defaults[field]["Default"] + "dup"
+                        elif aa == 'del': #check if it's a deletion (e.g. p.Gly70del)
+                            results[field] = WG_defaults[field]["Default"] + "del"
+                        else: results[field] = AA[aa]
                     elif len(result) == 2 and len(result[1]) > 3: #deal with complex mutations that START at the AA position of interest (takes the first AA change in the complex mutation)
                         aa = ''.join(list(result[1])[0:3])
-                        results[field] = AA[aa]
+                        if aa in AA:
+                            results[field] = AA[aa]
+                        else: #complex indel annotations (e.g. p.Gly70delins) do not start with a standard AA code
+                            results[field] = WG_defaults[field]["Default"]
                     else:
                         results[field] = WG_defaults[field]["Default"] 
                 else: 
